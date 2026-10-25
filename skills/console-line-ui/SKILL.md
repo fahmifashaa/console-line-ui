@@ -54,7 +54,7 @@ Full token rationale, contrast table, and Tailwind / CSS-in-JS mappings are in `
 ## How to apply
 
 1. **Install the foundation.** Copy `assets/console-line.css` into the project and import it once. On Tailwind, or wherever classes aren't wanted, map the tokens as `references/tokens.md` shows. Never hand-copy hex values into components; always go through tokens.
-2. **Compose from the catalogue.** Build screens from `references/components.md`: shell and rail, page header, attention panel, tallies, table, facts, badge (with the rule for choosing a signal), lamp, buttons, destructive tiers and kill switch, forms, options, dialog, tabs, queue/detail split, timeline, chart, notice, empty state. For React, start from `assets/react/ui.tsx`. Start a new component only after checking that none of these fits, and then follow "Extending" in `references/boundaries.md`.
+2. **Compose from the catalogue.** Build screens from `references/components.md`: shell and rail, page header, attention panel, tallies, table, facts, badge (with the rule for choosing a signal), lamp, buttons, destructive tiers and kill switch, forms, options, dialog, tabs, queue/detail split, timeline, dot-matrix chart with KPI tabs, inline meter, notice, empty state. For React, start from `assets/react/ui.tsx`. Start a new component only after checking that none of these fits, and then follow "Extending" in `references/boundaries.md`.
 3. **Write the words.** Follow `references/voice.md`: sentence case, consequence first, lower-case mono labels, humane empty states, verb + object on buttons.
 4. **Illustrate only with Hairline figures,** and only when a figure is the clearest way to show state. Read `references/illustration.md` first.
 5. **Verify.** Do every step below before saying it's done:
@@ -78,6 +78,7 @@ Full token rationale, contrast table, and Tailwind / CSS-in-JS mappings are in `
 | Icon-led buttons, emoji, decorative icons | Words. Glyphs limited to `×` (close), `→ ←` (paging), `·` (separator), `—` (no value) |
 | Spinners, skeleton shimmer, bouncy or springy UI motion | Text "Loading overview…"; row arrival fades from sunk surface |
 | Cards inside cards, a grid of stat cards | Tallies: one ruled row of numbers divided by hairlines |
+| Line/bar/area charts in brand colours, chart libraries | The dot-matrix chart: ink cells now, `--mark-before` cells for the previous period, KPI tabs below |
 | Toasts that pop and vanish | Inline `role="status"` text ("Saved") or an `error-note` beside the control |
 | Stock illustrations, 3D renders, photos | Hairline isometric line figures only |
 
@@ -97,7 +98,7 @@ The complete list, with reasons and the rules for adding new things without drif
 ## Files
 
 - `assets/console-line.css`: the portable stylesheet (tokens, both themes, every component)
-- `assets/react/ui.tsx`: framework primitives (Lamp, Badge, PageHeader, Field, Check, Dialog, ReasonDialog, Time, Tally, Empty, ErrorNote)
+- `assets/react/ui.tsx`: framework primitives (Lamp, Badge, PageHeader, Field, Check, Dialog, ReasonDialog, Time, Tally, Empty, ErrorNote, DotMatrix, KpiTabs, Meter)
 - `assets/specimen.html`: a page showing every component, for visual comparison
 - `scripts/check-style.mjs`: a linter for boundary violations in CSS, TSX/JSX, Vue, Svelte, and HTML
 - `references/tokens.md`, `components.md`, `voice.md`, `boundaries.md`, `illustration.md`

@@ -114,7 +114,7 @@ A row of numbers between two `--line` rules, separated by `--line-soft`. **This 
   - **neutral**: finished or out of play with nothing to do (refunded, cancelled, archived, retired, draft)
 
   When unsure between warn and danger, ask "can the user still fix this?" Yes → warn.
-- Never filled, never uppercase, never with an icon. Two badges side by side get a 0.35rem gap.
+- Never filled (the dot-matrix cursor pill is a place marker, not a badge), never uppercase, never with an icon. Two badges side by side get a 0.35rem gap.
 
 ### Lamp
 `<span class="lamp lamp--ok" role="img" aria-label="Online" title="Online"></span>`: a 0.55rem dot (0.75rem inside an h1).
@@ -213,8 +213,36 @@ A native `<dialog>` opened with `showModal()`. It has a 14px radius, a 1px line,
 
 ---
 
-## Chart (when a series really is needed)
-Prefer tallies. When the data is a series over time:
+## Dot-matrix chart (the default for a series over time)
+A series drawn as columns of square cells, filled from the bottom. It reads at a glance, compares two periods without a second hue, and stays inside the style's alphabet: ink, a neutral, and the sunk surface.
+
+```html
+<section class="chart-card" aria-labelledby="trends">
+  <div class="chart-card-head"><h2 id="trends">Trends</h2>
+    <div class="tabs" role="tablist" aria-label="Time window">…24h · 7d · 30d…</div></div>
+  <div class="chart-card-plot"><figure class="matrix">…</figure></div>   <!-- DotMatrix in assets/react/ui.tsx -->
+  <div class="kpis" role="tablist" aria-label="Metric">…</div>          <!-- KpiTabs -->
+</section>
+```
+
+- **Grid:** 12 rows × 48–60 columns, one column per time bucket (24h → 30 min, 7d → 3 h, 30d → 12 h). Fewer than ~40 columns and cells stop reading as squares, so bucket finer, not wider.
+- **Three cell states, no hue:** `--ink` = this period · `--mark-before` = the same slot one period earlier (3:1 on ground) · `--surface-sunk` = empty. Ink cells sit in front of before cells in the same column.
+- **Scale:** rows = `round(value / max × 12)` over the larger of both periods; any value above zero gets **at least one cell**, so a single failure never disappears. Y axis: three mono labels (max, half, 0).
+- **Cells:** square (`aspect-ratio: 1`), 4–16px tall, the **mark radius** 2px, gap 3px. Below a 560px container: gap 1px, radius 1px, and only the start, middle and end axis labels.
+- **Signals stay out of the cells.** A "failed runs" series is still ink; whether it got worse is said by the KPI delta in `--warn-text`.
+- **Cursor:** hover or ←/→/Home/End picks a column. It shows a 1px dashed `--ink-faint` crosshair, a hollow 9px dot with a 1.5px ink ring at the top of the ink cells, a tooltip (time · value · "previous …", flipping left past 60%), and a filled ink pill on the axis with the exact time. The pill is a place marker, not a badge.
+- **Hit-testing:** columns by pointer x over the plot's box; the plot is focusable (`tabIndex=0`, `role="img"`, title + description), and the picked column is announced through a visually hidden `role="status"`.
+- **Entrance:** ink cells rise from the bottom (0.32s ease-out, staggered 7ms per column + 22ms per row). It plays on mount and on a change of window or metric, never on a refetch; off under reduced motion. Remount the plot with a `key` of window + metric.
+- **Words around it:** the h2 names the section; the plot's title says the series and bucket ("Runs started per 30 minutes"); its description explains the cells ("Dark cells are this period, light cells the previous 24 hours.").
+
+### KPI tabs
+Under the plot, a row of tabs, one per metric: mono label, the figure in mono `--step-2`, and a delta against the previous period ("+18% vs previous 24h", "+3.2 pts vs previous 24h", "same as previous 24h", "was 5m"). Use a real minus (−). Only a delta that got **worse** takes `--warn-text`; better is never green. The selected tab gets a 1px ink rule on top; the figure is ink, the rest faint. Below 560px they wrap into two columns.
+
+### Inline meter
+`Meter` / `.meter-cell`: the figure, then a 4rem × 4px `--ink-faint` bar sized against the largest value in that column. For ranking rows in a table (failure rate per agent). No colour, no radius, no axis.
+
+## Line chart (fallback)
+Use only when the series is continuous and dense enough that buckets would lie (sub-minute telemetry), or when more than one series must be read against the same axis:
 - Put it in a `.panel` with an h2 and the headline figure in words ("6.2k events today, 61% of the daily limit").
 - **Data line:** 1.5px `--ink`, `vector-effect: non-scaling-stroke`. A second series uses `--ink-faint`. No more than two series; beyond that, use a table.
 - **Area:** optional, `--surface-sunk`, with no gradient.
@@ -223,7 +251,7 @@ Prefer tallies. When the data is a series over time:
 - **Breach:** a `--warn` dot on the points over a soft limit (`--danger` for a hard limit), with the word "over" next to them. The line itself stays ink.
 - **Labels:** mono `--label` and `--ink-faint`, placed at the line ends instead of a legend box. Keep text at real size: give the SVG a fixed pixel height and let only its width stretch (or cap the width), so 11px labels don't scale.
 - **Accessibility:** `role="img"` with `<title>`/`<desc>` summarising the trend, plus the numbers available as a table or in prose nearby.
-- No tooltips that carry information you can't get elsewhere, no animation on draw, no 3D, no pie or donut charts.
+- No animation on draw, no 3D, no pie or donut charts. A tooltip's figures must also be reachable by keyboard and screen reader, as the dot matrix does.
 
 ---
 

@@ -68,6 +68,24 @@
         <div class="tally tally--danger"><span class="tally-value">1</span><span class="tally-label">failed runs today</span></div>
       </section>
 
+      <section class="chart-card" aria-labelledby="trends" style="margin-top:2rem">
+        <div class="chart-card-head"><h2 id="trends">Trends</h2>
+          <div class="tabs" role="tablist" aria-label="Time window"><button type="button" role="tab" class="tab" aria-selected="true">24h</button><button type="button" role="tab" class="tab" aria-selected="false">7d</button><button type="button" role="tab" class="tab" aria-selected="false">30d</button></div></div>
+        <div class="chart-card-plot">
+          <figure class="matrix">
+            <div class="matrix-y" aria-hidden="true"><span>14</span><span>7</span><span>0</span></div>
+            <div class="matrix-body"><div class="matrix-plot" id="plot" role="img" tabindex="0" aria-label="Runs started per 30 minutes. Dark cells are this period, light cells the previous 24 hours."></div><div class="matrix-x" id="axis" aria-hidden="true"></div></div>
+          </figure>
+        </div>
+        <div class="kpis" role="tablist" aria-label="Metric">
+          <button type="button" role="tab" class="kpi" aria-selected="true"><span class="kpi-label">runs</span><span class="kpi-value">142</span><span class="kpi-delta">+18% vs previous 24h</span></button>
+          <button type="button" role="tab" class="kpi" aria-selected="false"><span class="kpi-label">failed runs</span><span class="kpi-value">6</span><span class="kpi-delta text-warn">+50% vs previous 24h</span></button>
+          <button type="button" role="tab" class="kpi" aria-selected="false"><span class="kpi-label">failure rate</span><span class="kpi-value">4.3%</span><span class="kpi-delta text-warn">+3.2 pts vs previous 24h</span></button>
+          <button type="button" role="tab" class="kpi" aria-selected="false"><span class="kpi-label">approvals</span><span class="kpi-value">18</span><span class="kpi-delta">same as previous 24h</span></button>
+          <button type="button" role="tab" class="kpi" aria-selected="false"><span class="kpi-label">median decision</span><span class="kpi-value">4m</span><span class="kpi-delta">was 5m</span></button>
+        </div>
+      </section>
+
       <h2>Agents</h2>
       <div class="filters">
         <div class="field"><label for="q">Search</label><input id="q" type="search" placeholder="Name or purpose"></div>
@@ -186,6 +204,31 @@
       else document.documentElement.setAttribute("data-theme", t);
     });
   }
+</script>
+<script>
+  // Specimen data for the dot matrix: 48 half-hour buckets, now and the previous 24 hours, cursor on 16:30.
+  const n = 48, rows = 12, max = 14, at = 33, plot = document.getElementById("plot"), axis = document.getElementById("axis");
+  plot.style.setProperty("--matrix-cols", n);
+  const cells = (v) => (v > 0 ? Math.max(1, Math.round((v / max) * rows)) : 0);
+  const now = Array.from({ length: n }, (_, c) => Math.max(0, Math.round(4 + 5 * Math.sin(c / 6) + 3 * Math.sin(c / 2.3) + (c > 28 ? 3 : 0))));
+  const before = Array.from({ length: n }, (_, c) => Math.round(4 + 3 * Math.sin(c / 5 + 1)));
+  const time = (c) => `${String(Math.floor(c / 2)).padStart(2, "0")}:${c % 2 ? "30" : "00"}`;
+  now.forEach((v, c) => {
+    const col = document.createElement("div"); col.className = "matrix-col";
+    for (let r = 0; r < rows; r++) {
+      const cell = document.createElement("span");
+      cell.className = "matrix-cell" + (r < cells(v) ? " matrix-cell--now" : r < cells(before[c]) ? " matrix-cell--before" : "");
+      cell.style.setProperty("--c", c); cell.style.setProperty("--r", r);
+      col.appendChild(cell);
+    }
+    plot.appendChild(col);
+  });
+  const left = ((at + 0.5) / n) * 100, y = (1 - cells(now[at]) / rows) * 100;
+  plot.insertAdjacentHTML("beforeend", `<span class="matrix-cross" style="left:${left}%"></span><span class="matrix-dot" style="left:${left}%;top:${y}%"></span>
+    <div class="matrix-tip matrix-tip--left" style="left:${left}%;top:${y}%"><span class="matrix-tip-time">25 Oct, ${time(at)}</span><strong>${now[at]}</strong><span class="matrix-tip-time">previous ${before[at]}</span></div>`);
+  [0, 9, 19, 28, 38, 47].forEach((t, i, all) => axis.insertAdjacentHTML("beforeend",
+    `<span class="matrix-x-label${i === 0 ? " matrix-x-label--start" : i === all.length - 1 ? " matrix-x-label--end" : i !== Math.floor((all.length - 1) / 2) ? " matrix-x-label--minor" : ""}" style="left:${((t + 0.5) / n) * 100}%">${time(t)}</span>`));
+  axis.insertAdjacentHTML("beforeend", `<span class="matrix-pill" style="left:${left}%">${time(at)}</span>`);
 </script>
 </body>
 </html>

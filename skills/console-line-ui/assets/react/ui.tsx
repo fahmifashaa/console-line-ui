@@ -1,5 +1,5 @@
 // console-line-ui primitives for React. Pair with console-line.css; no other dependencies.
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 
 // Time ------------------------------------------------------------------------------
 
@@ -234,4 +234,127 @@ export function useTheme(): ["system" | "light" | "dark", (t: "system" | "light"
     try { theme === "system" ? localStorage.removeItem("theme") : localStorage.setItem("theme", theme); } catch { /* storage blocked */ }
   }, [theme]);
   return [theme, setTheme];
+}
+
+// Dot-matrix chart --------------------------------------------------------------------
+
+export type MatrixPoint = { at: string; value: number | null; previous: number | null };
+
+/**
+ * A series as columns of cells, filled from the bottom: ink is now, --mark-before the same slot one period
+ * earlier. Hover or arrow keys read a column. `formatX(at, exact)` labels the axis (exact: for the cursor).
+ */
+export function DotMatrix({ points, title, description, format, formatX, rows = 12, labels = 6 }: {
+  points: MatrixPoint[]; title: string; description: string;
+  format: (v: number) => string; formatX: (at: string, exact: boolean) => string; rows?: number; labels?: number;
+}) {
+  const id = useId();
+  const plot = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<number | null>(null);
+  const max = Math.max(0, ...points.flatMap((p) => [p.value ?? 0, p.previous ?? 0]));
+  const scale = max || 1;
+  const n = points.length;
+  // Any value above zero shows at least one cell, so a single failure never disappears.
+  const cells = (v: number | null) => (v && v > 0 ? Math.max(1, Math.round((v / scale) * rows)) : 0);
+  const ticks = n ? Array.from({ length: labels }, (_, i) => Math.round((i * (n - 1)) / (labels - 1))) : [];
+
+  const pick = (e: PointerEvent<HTMLDivElement>) => {
+    const box = plot.current?.getBoundingClientRect();
+    if (!box || !n) return;
+    setActive(Math.min(n - 1, Math.max(0, Math.floor(((e.clientX - box.left) / box.width) * n))));
+  };
+  const step = (e: KeyboardEvent<HTMLDivElement>) => {
+    const moves: Record<string, number> = { ArrowLeft: (active ?? n) - 1, ArrowRight: (active ?? -1) + 1, Home: 0, End: n - 1 };
+    if (!(e.key in moves) || !n) return;
+    e.preventDefault();
+    setActive(Math.min(n - 1, Math.max(0, moves[e.key])));
+  };
+
+  const point = active === null ? null : points[active];
+  const left = active === null ? 0 : ((active + 0.5) / n) * 100;
+  const top = point ? (1 - cells(point.value) / rows) * 100 : 100;
+  const show = (v: number | null) => (v === null ? "—" : format(v));
+
+  return (
+    <figure className="matrix" style={{ "--matrix-rows": rows } as CSSProperties}>
+      <div className="matrix-y" aria-hidden="true">
+        <span>{max ? format(max) : ""}</span>
+        <span>{max ? format(max / 2) : ""}</span>
+        <span>0</span>
+      </div>
+      <div className="matrix-body">
+        <div ref={plot} className="matrix-plot" role="img" tabIndex={0} aria-labelledby={`${id}-t`} aria-describedby={`${id}-d`}
+          onPointerMove={pick} onPointerLeave={() => setActive(null)} onKeyDown={step} onBlur={() => setActive(null)}
+          style={{ "--matrix-cols": n } as CSSProperties}>
+          <span id={`${id}-t`} hidden>{title}</span>
+          <span id={`${id}-d`} hidden>{description}</span>
+          {points.map((p, col) => {
+            const now = cells(p.value), before = cells(p.previous);
+            return (
+              <div key={p.at} className="matrix-col">
+                {Array.from({ length: rows }, (_, row) => (
+                  <span key={row} style={{ "--c": col, "--r": row } as CSSProperties}
+                    className={`matrix-cell${row < now ? " matrix-cell--now" : row < before ? " matrix-cell--before" : ""}`} />
+                ))}
+              </div>
+            );
+          })}
+          {point && (
+            <>
+              <span className="matrix-cross" style={{ left: `${left}%` }} aria-hidden="true" />
+              <span className="matrix-dot" style={{ left: `${left}%`, top: `${top}%` }} aria-hidden="true" />
+              <div className={`matrix-tip${left > 60 ? " matrix-tip--left" : ""}`} style={{ left: `${left}%`, top: `${top}%` }}>
+                <span className="matrix-tip-time">{formatX(point.at, true)}</span>
+                <strong>{show(point.value)}</strong>
+                <span className="matrix-tip-time">previous {show(point.previous)}</span>
+              </div>
+            </>
+          )}
+        </div>
+        <div className="matrix-x" aria-hidden="true">
+          {ticks.map((t, i) => (
+            <span key={t} style={{ left: `${((t + 0.5) / n) * 100}%` }}
+              className={`matrix-x-label${i === 0 ? " matrix-x-label--start" : i === ticks.length - 1 ? " matrix-x-label--end" : i !== Math.floor((ticks.length - 1) / 2) ? " matrix-x-label--minor" : ""}`}>
+              {formatX(points[t].at, false)}
+            </span>
+          ))}
+          {point && <span className="matrix-pill" style={{ left: `${left}%` }}>{formatX(point.at, true)}</span>}
+        </div>
+        <p className="visually-hidden" role="status">
+          {point ? `${formatX(point.at, true)}: ${show(point.value)}, previous ${show(point.previous)}` : ""}
+        </p>
+      </div>
+    </figure>
+  );
+}
+
+export type Kpi = { key: string; label: string; value: string; delta: string; worse?: boolean };
+
+/** A row of figures that choose what the chart above them shows. Colour the delta only when it got worse. */
+export function KpiTabs({ items, selected, onSelect, label }: {
+  items: Kpi[]; selected: string; onSelect: (key: string) => void; label: string;
+}) {
+  return (
+    <div className="kpis" role="tablist" aria-label={label}>
+      {items.map((k) => (
+        <button key={k.key} type="button" role="tab" aria-selected={k.key === selected} className="kpi" onClick={() => onSelect(k.key)}>
+          <span className="kpi-label">{k.label}</span>
+          <span className="kpi-value">{k.value}</span>
+          <span className={`kpi-delta${k.worse ? " text-warn" : ""}`}>{k.delta}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** A 4px bar beside a figure in a table cell; `ratio` is value / largest value in the column. */
+export function Meter({ ratio, children }: { ratio: number; children: ReactNode }) {
+  return (
+    <span className="meter-cell">
+      {children}
+      <span className="meter-track" aria-hidden="true">
+        <span className="meter" style={{ width: `${Math.max(0, Math.min(1, ratio)) * 100}%` }} />
+      </span>
+    </span>
+  );
 }

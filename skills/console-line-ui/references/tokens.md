@@ -22,6 +22,7 @@ The palette is deliberately small: a ground, three inks, two lines, three signal
 | `--line` | `#e0e0e4` | `#29292d` | frame borders, control borders, header rules |
 | `--line-soft` | `#ececef` | `#1c1c20` | row dividers and separators *inside* a frame |
 | `--scrim` | `rgba(8,9,10,.5)` | same | dialog backdrop |
+| `--mark-before` | `#909098` | `#5f6168` | dot-matrix cells for the previous period: 3.2:1 on ground, clearly apart from ink |
 
 Dark mode is not inverted grey. Its ink is a cool blue-grey (`#d0d6e0`) on a near-black with a faint green-blue cast. Keep that pair; don't substitute pure `#fff` on `#000`.
 
@@ -105,8 +106,10 @@ The 1.3:1 line means focus can never be shown by a border colour change alone. F
 | `--radius-panel` | 14px | table frames, panels, dialogs, plates, login card |
 | (pill) | 1rem | badges and counts only |
 | (guard) | 4px | kill-switch guard only |
+| (mark) | 2px, 1px narrow | dot-matrix cells only |
 | `--control-h` | 32px | buttons, inputs, selects |
 | `--control-h-small` | 26px | table-row and paging buttons |
+| matrix cell | square, 4–16px, gap 3px (1px narrow) | 12 rows × 48–60 columns |
 | stroke | 1px | every border; focus outline 1.5px |
 | rail width | 13.5rem | |
 | content max | 92rem | `main` |

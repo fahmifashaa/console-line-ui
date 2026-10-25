@@ -30,6 +30,7 @@
   --warn-soft: #fbf3e4;
   --brand: #8a4b2a;
   --scrim: rgba(8, 9, 10, 0.5);
+  --mark-before: #909098; /* previous-period cells: 3.2:1 on ground */
 
   --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -77,6 +78,7 @@
     --brand: #d08a62;
     --hairline-edge: #5b5d64;
     --hairline-mid: #3e3e44;
+    --mark-before: #5f6168;
     color-scheme: dark;
   }
 }
@@ -105,6 +107,7 @@
   --brand: #d08a62;
   --hairline-edge: #5b5d64;
   --hairline-mid: #3e3e44;
+  --mark-before: #5f6168;
   color-scheme: dark;
 }
 
@@ -241,6 +244,62 @@ h1 .lamp { width: 0.75rem; height: 0.75rem; }
 .plain-list time { color: var(--ink-faint); }
 .list-more { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.75rem; }
 .empty { color: var(--ink-faint); padding: 1rem 0; margin: 0; }
+
+/* Dot-matrix chart: one column of cells per bucket, filled from the bottom. Ink cells are now,
+   --mark-before cells behind them the same slot one period earlier. Cells are marks, not controls,
+   so they take the mark radius (2px, 1px when narrow). */
+.matrix { --matrix-rows: 12; --matrix-gap: 3px; display: grid; grid-template-columns: 2.25rem minmax(0, 1fr); gap: 0.6rem; margin: 0; }
+.matrix-y { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 2.1rem; text-align: right; }
+.matrix-y, .matrix-x-label, .matrix-tip-time { font-family: var(--mono); font-size: var(--label); letter-spacing: 0.02em; color: var(--ink-faint); line-height: 1; }
+.matrix-body { min-width: 0; container-type: inline-size; }
+.matrix-plot { position: relative; display: grid; grid-template-columns: repeat(var(--matrix-cols, 48), minmax(0, 1fr)); column-gap: var(--matrix-gap); cursor: crosshair; }
+.matrix-plot:focus-visible { outline: 1.5px solid var(--ink); outline-offset: 6px; }
+.matrix-col { display: flex; flex-direction: column-reverse; gap: var(--matrix-gap); }
+/* As tall as the column is wide, capped so 48-60 columns stay a calm height on wide screens. */
+.matrix-cell { display: block; aspect-ratio: 1; min-height: 4px; max-height: 16px; border-radius: 2px; background: var(--surface-sunk); }
+.matrix-cell--before { background: var(--mark-before); }
+.matrix-cell--now { background: var(--ink); animation: cell-rise 0.32s ease-out both; animation-delay: calc(var(--c, 0) * 7ms + var(--r, 0) * 22ms); }
+@keyframes cell-rise { from { background: var(--surface-sunk); transform: scaleY(0.4); } }
+.matrix-cross { position: absolute; top: -0.4rem; bottom: -0.4rem; border-left: 1px dashed var(--ink-faint); pointer-events: none; }
+.matrix-dot { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--ink); transform: translate(-50%, -50%); pointer-events: none; }
+.matrix-tip { position: absolute; z-index: 2; transform: translate(12px, -50%); display: flex; flex-direction: column; gap: 0.3rem; padding: 0.5rem 0.7rem; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-control); white-space: nowrap; pointer-events: none; }
+.matrix-tip--left { transform: translate(calc(-100% - 12px), -50%); }
+.matrix-tip strong { font-family: var(--mono); font-size: var(--step-0); font-weight: 500; font-variant-numeric: tabular-nums; }
+.matrix-x { position: relative; height: 1.5rem; margin-top: 0.6rem; }
+.matrix-x-label { position: absolute; top: 0.3rem; transform: translateX(-50%); white-space: nowrap; }
+/* The end labels hug the plot's edges instead of centring past them. */
+.matrix-x-label--start { transform: none; }
+.matrix-x-label--end { transform: translateX(-100%); }
+/* The cursor read-out on the axis: the one filled pill, because it marks a place, not a state. */
+.matrix-pill { position: absolute; top: 0; z-index: 1; transform: translateX(-50%); padding: 0.25rem 0.5rem; border-radius: 1rem; background: var(--ink); color: var(--ground); font-family: var(--mono); font-size: var(--label); letter-spacing: 0.02em; line-height: 1; white-space: nowrap; }
+@container (max-width: 560px) {
+  .matrix { --matrix-gap: 1px; }
+  .matrix-cell { border-radius: 1px; }
+  .matrix-x-label--minor { display: none; }
+}
+
+/* KPI tabs: a row of figures that choose what the chart above shows. The selected one gets an ink rule on top. */
+.kpis { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(8.5rem, 1fr); border-top: 1px solid var(--line); }
+.kpi { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.85rem 1rem 1rem; margin-top: -1px; background: none; border: 0; border-top: 1px solid transparent; border-left: 1px solid var(--line-soft); color: var(--ink-faint); font: inherit; text-align: left; cursor: pointer; }
+.kpi:first-child { border-left: 0; }
+.kpi:hover { background: var(--surface-sunk); }
+.kpi:focus-visible { outline: 1.5px solid var(--ink); outline-offset: -4px; }
+.kpi[aria-selected="true"] { border-top-color: var(--ink); color: var(--ink); }
+.kpi-label, .kpi-delta { font-family: var(--mono); font-size: var(--label); letter-spacing: 0.02em; line-height: 1.3; }
+.kpi-label { text-transform: lowercase; }
+.kpi-value { font-family: var(--mono); font-size: var(--step-2); font-variant-numeric: tabular-nums; }
+.kpi-delta { color: var(--ink-faint); }
+.kpi-delta.text-warn { color: var(--warn-text); }
+.chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-panel); overflow: hidden; }
+.chart-card-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; padding: 0.9rem 1.25rem 0; }
+.chart-card-head h2 { margin: 0; }
+.chart-card-head .tabs { border-bottom: 0; margin-bottom: 0; }
+.chart-card-plot { padding: 1.25rem 1.25rem 1rem; }
+
+/* Inline meter: a 4px bar beside a figure in a table cell, relative to the column's largest value. */
+.meter-cell { display: flex; align-items: center; gap: 0.6rem; }
+.meter-track { flex: 0 0 4rem; height: 4px; }
+.meter { display: block; height: 4px; min-width: 1px; background: var(--ink-faint); }
 
 /* Tables -------------------------------------------------------------------- */
 
@@ -413,4 +472,10 @@ select option { background: var(--surface); color: var(--ink); }
   .page-header { flex-direction: column; }
   .filters .field { width: calc(50% - 0.5rem); }
   .table-wrap table { min-width: 46rem; }
+}
+
+@media (max-width: 560px) {
+  .kpis { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+  .kpi { border-left: 0; border-bottom: 1px solid var(--line-soft); }
+  .kpi:nth-child(even) { border-left: 1px solid var(--line-soft); }
 }

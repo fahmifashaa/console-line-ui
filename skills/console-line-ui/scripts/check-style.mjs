@@ -12,8 +12,9 @@ const SKIP_FILE = /(^|[\\/])kernel\.js$|\.min\.(js|css)$|\.d\.ts$/;
 
 // Every part of a border-radius value must be on the scale.
 const RADIUS_OK = new Set(["0", "50%", "1rem", "4px", "0.2rem", "inherit", "var(--radius-control)", "var(--radius-panel)"]);
+// The mark radius (2px, 1px) belongs to dot-matrix cells only.
 const radius = { test: (line) => [...line.matchAll(/border-radius\s*:\s*([^;"'`}]+)/gi)]
-  .some((m) => m[1].trim().split(/\s+/).some((v) => !RADIUS_OK.has(v))) };
+  .some((m) => m[1].trim().split(/\s+/).some((v) => !RADIUS_OK.has(v) && !(/matrix-cell/.test(line) && /^[12]px$/.test(v)))) };
 
 // [id, level, regex-or-{test}, message]. Order matters only for output.
 const RULES = [
