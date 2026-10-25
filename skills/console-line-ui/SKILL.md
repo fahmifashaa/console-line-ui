@@ -1,6 +1,6 @@
 ---
 name: console-line-ui
-description: Use when building, restyling, or reviewing any interface that should look like console-line-ui or "the console line style": a monochrome, Hairline-inspired UI with 1px borders, small lowercase monospace labels, and colour used only for signal states. Covers dashboards, admin consoles, internal tools, HTML artifacts, and landing pages in any project or framework. Also use when deciding whether a new colour, component, font, icon, shadow, illustration, or piece of UI copy stays in the style.
+description: 'Use when building, restyling, or reviewing any interface that should look like console-line-ui or "the console line style": a monochrome, Hairline-inspired UI with 1px borders, small lowercase monospace labels, and colour used only for signal states. Covers dashboards, admin consoles, internal tools, HTML artifacts, and landing pages in any project or framework. Also use when deciding whether a new colour, component, font, icon, shadow, illustration, or piece of UI copy stays in the style.'
 ---
 
 # console-line-ui
