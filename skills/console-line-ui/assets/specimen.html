@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console line specimen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23232327'/%3E%3Crect x='13' y='6' width='6' height='20' rx='3' transform='rotate(18 16 16)' fill='%23c27a4f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="console-line.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="wordmark"><span class="wordmark-mark" aria-hidden="true"></span>Acme Ops</div>
+    <nav aria-label="Main">
+      <a href="#" aria-current="page">Overview</a>
+      <a href="#">Agents</a>
+      <a href="#">Live activity</a>
+      <a href="#">Approvals <span class="count" aria-label="2 waiting">2</span></a>
+      <a href="#">Policies</a>
+      <a href="#">Audit log</a>
+    </nav>
+    <div class="rail-footer">
+      <div class="whoami"><strong>Dewi Lestari</strong><span>Operator</span></div>
+      <div class="toolbar" style="margin:0">
+        <button type="button" class="link-button" data-set-theme="system">system</button>
+        <button type="button" class="link-button" data-set-theme="light">light</button>
+        <button type="button" class="link-button" data-set-theme="dark">dark</button>
+      </div>
+    </div>
+  </aside>
+  <div class="workspace">
+    <div class="stream stream--live"><span class="stream-dot" aria-hidden="true"></span><span>Live</span></div>
+    <main>
+      <header class="page-header">
+        <div>
+          <h1>Overview</h1>
+          <p class="lede">2 things need a decision or a look.</p>
+        </div>
+        <div class="page-actions">
+          <button type="button" class="button">Export</button>
+          <button type="button" class="button button--primary">Register agent</button>
+        </div>
+      </header>
+
+      <section class="panel" aria-label="Needs attention">
+        <h2>Needs attention</h2>
+        <ul class="attention-list">
+          <li>
+            <span class="lamp lamp--warn" role="img" aria-label="Waiting for approval" title="Waiting for approval"></span>
+            <div><a class="attention-title" href="#">invoice-bot wants to run <code class="mono">payments.send</code></a><p>Pay 14 vendor invoices due today.</p></div>
+            <span class="label text-danger">High risk</span>
+            <span class="muted nowrap">expires in 12 minutes</span>
+          </li>
+          <li>
+            <span class="lamp lamp--danger" role="img" aria-label="High warning" title="High warning"></span>
+            <div><a class="attention-title" href="#">ledger-sync</a><p>No heartbeat from 2 instances for 9 minutes.</p></div>
+            <span class="label text-danger">High</span>
+            <span class="muted">Production</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="tallies" aria-label="Fleet">
+        <div class="tally"><span class="tally-value">12</span><span class="tally-label">instances online</span></div>
+        <div class="tally"><span class="tally-value">4</span><span class="tally-label">executions running</span></div>
+        <div class="tally tally--warn"><span class="tally-value">2</span><span class="tally-label">instances silent</span></div>
+        <div class="tally"><span class="tally-value">0</span><span class="tally-label">terminations unconfirmed</span></div>
+        <div class="tally tally--danger"><span class="tally-value">1</span><span class="tally-label">failed runs today</span></div>
+      </section>
+
+      <h2>Agents</h2>
+      <div class="filters">
+        <div class="field"><label for="q">Search</label><input id="q" type="search" placeholder="Name or purpose"></div>
+        <div class="field"><label for="s">Filter by state</label><select id="s"><option>Any</option><option>Active</option></select></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th aria-label="Signal"></th><th>Agent</th><th>Owner</th><th>State</th><th>Instances</th><th>Last contact</th><th></th></tr></thead>
+          <tbody>
+            <tr class="fresh">
+              <td><span class="lamp lamp--ok" role="img" aria-label="Online" title="Online"></span></td>
+              <td><a class="strong-link" href="#">invoice-bot</a><div class="muted small">python, can wait for approval</div></td>
+              <td>Dewi Lestari</td>
+              <td><span class="badge badge--ok">Active</span></td>
+              <td>3 online</td>
+              <td><time title="25 Oct 2026, 10:42:07">just now</time></td>
+              <td class="actions"><button type="button" class="button button--small">Edit</button></td>
+            </tr>
+            <tr>
+              <td><span class="lamp lamp--warn" role="img" aria-label="Needs attention" title="Needs attention"></span></td>
+              <td><a class="strong-link" href="#">ledger-sync</a><div class="muted small">n8n, activity only</div></td>
+              <td>Budi Santoso</td>
+              <td><span class="badge badge--warn">Suspended</span><span class="badge">Offboarding</span></td>
+              <td>1 online <span class="text-warn">· 2 silent</span></td>
+              <td><time title="25 Oct 2026, 10:33:00">9 minutes ago</time></td>
+              <td class="actions"><button type="button" class="button button--small">Edit</button></td>
+            </tr>
+            <tr class="is-muted">
+              <td><span class="lamp" role="img" aria-label="Retired" title="Retired"></span></td>
+              <td><a class="strong-link" href="#">old-exporter</a><div class="muted small">jenkins, activity only</div></td>
+              <td class="text-danger">Ari Wibowo</td>
+              <td><span class="badge badge--danger">Revoked</span></td>
+              <td>0 online</td>
+              <td><time>never</time></td>
+              <td class="actions"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="columns">
+        <section>
+          <h2>Details</h2>
+          <dl class="facts facts--stacked">
+            <div><dt>Owner</dt><dd>Dewi Lestari</dd></div>
+            <div><dt>Environment</dt><dd>Production</dd></div>
+            <div><dt>Risk</dt><dd><span class="label text-warn">Medium</span></dd></div>
+            <div><dt>Rule</dt><dd>—</dd></div>
+          </dl>
+          <p class="notice">3 executions are still running.</p>
+          <p class="error-note" role="alert">Couldn't save the rule. Check the action pattern and try again.</p>
+          <div class="toolbar">
+            <button type="button" class="button button--primary">Approve</button>
+            <button type="button" class="button button--danger-outline">Reject</button>
+            <button type="button" class="button" disabled>Rotate credential</button>
+            <button type="button" class="kill-switch"><span class="kill-switch-guard" aria-hidden="true"></span>Emergency kill</button>
+          </div>
+        </section>
+        <section>
+          <h2>Recent control actions</h2>
+          <ul class="plain-list">
+            <li><strong>Dewi Lestari</strong> paused a run of <a href="#">invoice-bot</a><p class="muted small">“Vendor list looks stale.”</p><time>4 minutes ago</time></li>
+            <li><strong>System</strong> revoked a credential of <a href="#">old-exporter</a><time>2 hours ago</time></li>
+          </ul>
+          <div class="list-more"><button type="button" class="button button--small">View more</button></div>
+          <h2>Timeline</h2>
+          <ol class="timeline">
+            <li class="timeline-item"><time>10:41:02</time><p>Execution started</p></li>
+            <li class="timeline-item timeline-item--warn"><time>10:41:40</time><p>Waiting for approval of <code class="mono">payments.send</code></p></li>
+            <li class="timeline-item timeline-item--danger"><time>10:44:13</time><p>Failed: upstream returned 502</p></li>
+          </ol>
+        </section>
+      </div>
+
+      <h2>Approvals</h2>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab" aria-selected="true">Waiting</button>
+        <button type="button" role="tab" class="tab" aria-selected="false">All</button>
+      </div>
+      <div class="split">
+        <ul class="queue">
+          <li><button type="button" class="queue-item is-selected"><span class="queue-title"><code class="mono">payments.send</code></span><span class="label text-danger">High</span><span class="muted small">invoice-bot · 3 minutes ago</span></button></li>
+          <li><button type="button" class="queue-item"><span class="queue-title"><code class="mono">crm.delete</code></span><span class="label muted">Low</span><span class="muted small">crm-tidy · 1 hour ago</span></button></li>
+        </ul>
+        <div class="split-detail">
+          <form onsubmit="return false">
+            <div class="field"><label for="c">Comment</label><textarea id="c" rows="2"></textarea><p class="hint">Optional. The agent and the audit log see it.</p></div>
+            <fieldset class="fieldset">
+              <legend>What this integration can do</legend>
+              <div class="check"><input id="k1" type="checkbox" checked disabled><label for="k1">Sends activity<span class="hint">Every agent reports activity.</span></label></div>
+              <div class="check"><input id="k2" type="checkbox"><label for="k2">Can wait for approval<span class="hint">It pauses before sensitive actions until someone decides.</span></label></div>
+            </fieldset>
+            <pre class="secret">APP_CLIENT_ID=ag_7f3c…</pre>
+          </form>
+        </div>
+      </div>
+
+      <h2>Options</h2>
+      <fieldset class="options"><legend class="visually-hidden">Plan</legend>
+        <label class="option"><input type="radio" name="plan"><span><span class="option-title">Free</span><span class="muted small">1 seat · 5k events a day</span></span></label>
+        <label class="option"><input type="radio" name="plan" checked><span><span class="option-title">Team <span class="badge">Current plan</span></span><span class="muted small">10 seats · 100k events a day</span></span></label>
+        <label class="option"><input type="radio" name="plan"><span><span class="option-title">Enterprise</span><span class="muted small">Unlimited seats · SSO · audit export</span></span></label>
+      </fieldset>
+
+      <h2>Empty and loading</h2>
+      <p class="empty">No agent is waiting on a decision.</p>
+      <div class="boot" style="padding:0">Loading overview…</div>
+    </main>
+  </div>
+</div>
+<script>
+  for (const b of document.querySelectorAll("[data-set-theme]")) {
+    b.addEventListener("click", () => {
+      const t = b.dataset.setTheme;
+      if (t === "system") document.documentElement.removeAttribute("data-theme");
+      else document.documentElement.setAttribute("data-theme", t);
+    });
+  }
+</script>
+</body>
+</html>
