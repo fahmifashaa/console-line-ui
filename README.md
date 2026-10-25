@@ -34,7 +34,7 @@ Copy `skills/console-line-ui/assets/console-line.css` into a project and open `s
 
 ## Credits
 
-The dot-matrix chart with KPI tabs is modelled on the performance chart in Morphin's dashboard, redrawn in this style's tokens.
+The dot-matrix chart with KPI tabs is modelled on the performance chart in Morphin's dashboard (https://morphin.dev/components/animated-dashboard-performance-chart), redrawn in this style's tokens.
 
 Isometric line illustrations follow the Hairline figures by Lucas Marques ([lucasmarkes/hairline](https://github.com/lucasmarkes/hairline), MIT). This skill doesn't bundle the Hairline kernel; it points to it.
 
